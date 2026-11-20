@@ -3,6 +3,8 @@
 :root {
   --blue: #7C90BB;
   --orange: #fa4e0a;
+  --text-orange: #F25E24;
+  --pale-green: #CCE3AE;
   --paper: #EFEFE2;
   --ink: #120e0d;
   --secondary: #092a0f;
@@ -41,14 +43,15 @@ nav a:hover { color: var(--secondary); text-decoration: underline; }
 .art-caption, .scene-index, .experience-heading .eyebrow,
 .steps p, .steps article > span, .room-label, .connection-line small,
 .manifesto-bottom p { color: var(--secondary); }
-.hero h1 em, .hero-after em, .manifesto h2 em, .experience h2 em,
-.closing h2 em, .asterisk { color: var(--secondary); }
+.manifesto h2 em, .experience h2 em, .asterisk { color: var(--secondary); }
+.hero h1 em, .hero-after em, .closing h2 em { color: var(--pale-green); }
+.play-copy h2 em, .inside-title .orange-word { color: var(--text-orange); }
 .hero .dark, .button.dark { background: var(--ink); color: var(--paper); }
 .button.light { background: var(--paper); color: var(--ink); }
 .button:hover { background: var(--secondary); color: var(--paper); }
 .manifesto, .play-section, .inside { background: var(--paper); }
-.background-word { color: var(--blue); }
-.experience, .motion-ready .experience-runway, .closing { background: var(--orange); }
+.background-word { color: var(--text-orange); opacity: 1; }
+.experience, .experience-runway, .motion-ready .experience-runway, .closing { background: var(--blue); }
 .steps { border-color: var(--secondary); }
 .scene-index i, .page-progress { background: var(--secondary); }
 .status-dot, .legend-dot { background: var(--secondary); }
@@ -70,6 +73,6 @@ nav a:hover { color: var(--secondary); text-decoration: underline; }
 }
 .closing-piece:after { border-color: #120e0d40; }
 .hero-art .piece-cream { background: var(--paper); }
-/* Use full opacity for step copy on the saturated orange background. */
+/* Keep step copy readable throughout the scroll sequence. */
 .steps article { opacity: 1 !important; }
 .steps article[data-active="true"] h3 { text-decoration: underline; text-underline-offset: 5px; }
