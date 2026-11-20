@@ -62,7 +62,21 @@ revealTargets.forEach(element=>revealObserver.observe(element));
 let frame=0,lastTime=0,currentY=scrollY,targetY=scrollY;
 let pointerX=0,pointerY=0,easedX=0,easedY=0;
 const animated=[hero,heroCopy,heroBoard,heroFloat,heroAfter,red,cream,$('.scene-halo'),$('.manifesto-bottom'),$('.background-word'),$('.board-left'),$('.board-right'),$('.connection-line'),...document.querySelectorAll('.steps article'),...words];
-function measure(){sceneTracks.forEach(track=>{track.top=track.element.getBoundingClientRect().top+scrollY;track.range=Math.max(1,track.element.offsetHeight-innerHeight);});}
+function measure(){
+  const manifesto=$('.manifesto'), together=$('.background-word');
+  // Fit the actual installed font, rather than assuming all Futura fallbacks
+  // have the same width. Reset first so resizing can also enlarge the word.
+  together.style.removeProperty('font-size');
+  const style=getComputedStyle(manifesto);
+  const available=manifesto.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);
+  if(together.scrollWidth>available*.96){
+    together.style.fontSize=(parseFloat(getComputedStyle(together).fontSize)*available*.96/together.scrollWidth)+'px';
+  }
+  const height=manifesto.offsetHeight;
+  manifesto.style.setProperty('--manifesto-sticky-top',Math.min(0,innerHeight-height)+'px');
+  $('.manifesto-runway').style.setProperty('--manifesto-track-height',(Math.max(height,innerHeight)+innerHeight*.8)+'px');
+  sceneTracks.forEach(track=>{track.top=track.element.getBoundingClientRect().top+scrollY;track.range=Math.max(1,track.element.offsetHeight-innerHeight);});
+}
 function render(time){
   frame=0;
   if(motion.matches)return;
@@ -88,7 +102,7 @@ function render(time){
   $('.scene-halo').style.transform=`translate3d(${-turn*20}vw,${turn*15}vh,0) scale(${1+turn*.3})`;
   words.forEach((word,index)=>{const active=clamp((m*.95+.08)*words.length-index);word.style.color=`color-mix(in srgb, var(--statement-ink, #120e0d) ${Math.round(active*100)}%, var(--statement-muted, #a5aa9b))`;});
   $('.manifesto-bottom').style.opacity=(.4+.6*smooth(m/.65)).toFixed(3);
-  $('.background-word').style.transform=`translate3d(${-8+m*12}%,${50-m*80}px,0)`;
+  $('.background-word').style.transform=`translate3d(0,${12-m*24}px,0)`;
   const connect=smooth(c/.8);
   $('.board-left').style.transform=`translate3d(${(1-connect)*-70}px,${(1-connect)*50}px,0) rotate(${(1-connect)*-12}deg)`;
   $('.board-right').style.transform=`translate3d(${(1-connect)*70}px,${(1-connect)*-45}px,0) rotate(${(1-connect)*12}deg)`;
