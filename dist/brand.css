@@ -1,0 +1,75 @@
+/* Slowboard brand palette. Futura uses the visitor's installed font;
+   a licensed webfont can be added here when supplied. */
+:root {
+  --blue: #7C90BB;
+  --orange: #fa4e0a;
+  --paper: #EFEFE2;
+  --ink: #120e0d;
+  --secondary: #092a0f;
+  --muted: var(--secondary);
+  --green: var(--secondary);
+  --coral: var(--orange);
+  --scene: var(--blue);
+  --accent: var(--secondary);
+  --line: #092a0f30;
+  --brand-font: Futura, 'Futura PT', 'Futura Std', 'Century Gothic', sans-serif;
+  --serif: var(--brand-font);
+  --statement-ink: var(--ink);
+  --statement-muted: #a5aa9b;
+}
+body, button, .brand, .hero h1, h2, .manifesto h2,
+.demo-grid .cell, em, .background-word, .asterisk {
+  font-family: var(--brand-font);
+}
+body { background: var(--paper); color: var(--ink); }
+em, .background-word { font-style: normal; }
+.header, .hero, .experience { color: var(--ink); }
+.header { border-color: var(--line); }
+.header .brand-mark i { background: var(--ink); }
+.header .brand-mark i:last-child { background: var(--orange); }
+.header .nav-cta { border-color: var(--secondary); }
+.header .nav-cta:hover { background: var(--secondary); color: var(--paper); }
+nav a:hover { color: var(--secondary); text-decoration: underline; }
+.hero-runway, .hero { background: var(--blue); }
+.scene-halo { background: radial-gradient(ellipse, #EFEFE260, transparent 65%); }
+.scene-grid {
+  background-image: linear-gradient(#092a0f0d 1px, transparent 1px),
+    linear-gradient(90deg, #092a0f0d 1px, transparent 1px);
+}
+.hero-art .orbit { border-color: #092a0f25; }
+.hero .eyebrow, .hero-description, .hero-after > span,
+.art-caption, .scene-index, .experience-heading .eyebrow,
+.steps p, .steps article > span, .room-label, .connection-line small,
+.manifesto-bottom p { color: var(--secondary); }
+.hero h1 em, .hero-after em, .manifesto h2 em, .experience h2 em,
+.closing h2 em, .asterisk { color: var(--secondary); }
+.hero .dark, .button.dark { background: var(--ink); color: var(--paper); }
+.button.light { background: var(--paper); color: var(--ink); }
+.button:hover { background: var(--secondary); color: var(--paper); }
+.manifesto, .play-section, .inside { background: var(--paper); }
+.background-word { color: var(--blue); }
+.experience, .motion-ready .experience-runway, .closing { background: var(--orange); }
+.steps { border-color: var(--secondary); }
+.scene-index i, .page-progress { background: var(--secondary); }
+.status-dot, .legend-dot { background: var(--secondary); }
+.coral { background: var(--orange) !important; }
+.connection-line { background: linear-gradient(90deg, #092a0f10, var(--secondary), #092a0f10); }
+.connection-line:after { background: var(--paper); box-shadow: 0 0 14px 4px #EFEFE275; }
+.demo-grid .cell { background: var(--paper); color: var(--ink); }
+.demo-grid .cell.alt { background: var(--blue); color: var(--ink); }
+.demo-grid .cell:hover, .demo-grid .cell.selected {
+  background: var(--secondary); color: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.demo-grid .cell.received { background: var(--orange); color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+.demo-grid .cell:focus-visible { outline-color: var(--ink); }
+.reset, .prototype-note > span { border-color: var(--secondary); }
+.hero-art .piece-coral, .closing-piece {
+  background: linear-gradient(135deg, #ff8551, var(--orange));
+  box-shadow: 0 10px 0 #b93605, 0 30px 40px #120e0d30;
+}
+.closing-piece:after { border-color: #120e0d40; }
+.hero-art .piece-cream { background: var(--paper); }
+/* Use full opacity for step copy on the saturated orange background. */
+.steps article { opacity: 1 !important; }
+.steps article[data-active="true"] h3 { text-decoration: underline; text-underline-offset: 5px; }
