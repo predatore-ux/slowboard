@@ -12,16 +12,15 @@
 #play .demo-topline,#play .demo-bottomline{font-size:12px;gap:16px;flex-wrap:wrap}
 #play .demo-grid .sensor-cell{cursor:default;font-size:14px;background:var(--paper);color:var(--ink);box-shadow:none}
 #play .demo-grid .sensor-cell.alt{background:var(--blue)}
-.sensor-marker{position:absolute;width:54%;height:54%;border-radius:50%;background:var(--secondary);box-shadow:0 3px 0 #051b09,0 6px 12px #092a0f25;opacity:0;transform:scale(.7);transition:opacity .15s,transform .15s}
-.sensor-marker:after{content:'';position:absolute;inset:15%;border:1px solid #CCE3AE80;border-radius:50%}
-.sensed .sensor-marker{opacity:1;transform:scale(1)}
-.sensor-coordinate{z-index:1;transition:transform .15s}
-.sensed .sensor-coordinate{transform:translateY(210%);font-size:11px}
+#play .demo-grid .sensor-cell.sensed{background:var(--orange);color:var(--ink);box-shadow:inset 0 0 0 2px var(--secondary)}
+#play .demo-grid .sensor-cell.sensed:after{background:var(--paper);box-shadow:0 0 8px 3px #EFEFE2b0}
+.sensor-coordinate{z-index:1}
+#play .legend-sensed{width:10px;height:10px;border-radius:2px;background:var(--orange);border:1px solid var(--secondary)}
 .sensor-unknown{display:none}
 .sensor-unavailable .sensor-unknown{display:block;position:absolute;top:18%;font-size:clamp(18px,2vw,24px);line-height:1;color:var(--secondary)}
 .sensor-unavailable .sensor-coordinate{position:absolute;bottom:5px;font-size:11px}
 #play .demo-grid .sensor-unavailable{background-image:repeating-linear-gradient(135deg,transparent 0 8px,#120e0d08 8px 9px)}
 .legend-unknown{font-style:normal;font-size:14px}
 #play #sensor-last-change{font-size:14px;min-height:3em;overflow-wrap:anywhere}
-@media(prefers-reduced-motion:reduce){.sensor-marker,.sensor-coordinate{transition:none}}
-@media(max-width:480px){#play .demo-board{padding:12px}#play .demo-topline{letter-spacing:.7px}.sensor-actions{gap:8px}.sensor-actions button,.sensor-actions a{padding:11px 13px}.sensor-unavailable .sensor-coordinate{bottom:3px}.sensed .sensor-coordinate{transform:translateY(150%)}}
+@media(prefers-reduced-motion:reduce){#play .demo-grid .sensor-cell{transition:none}}
+@media(max-width:480px){#play .demo-board{padding:12px}#play .demo-topline{letter-spacing:.7px}.sensor-actions{gap:8px}.sensor-actions button,.sensor-actions a{padding:11px 13px}.sensor-unavailable .sensor-coordinate{bottom:3px}}

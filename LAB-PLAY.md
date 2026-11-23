@@ -19,7 +19,7 @@ temporary lifts and positions that are not legal moves. Both tabs must use the s
 site address and browser profile. This is a local browser stream, not a Wi-Fi or
 remote internet feed. Simulator readings are never broadcast as hardware readings.
 
-Green discs mean magnet detected; unmarked squares mean confirmed empty; question
+Orange squares mean magnet detected; blue/off-white squares mean confirmed empty; question
 marks mean unknown/unreadable. A failed PCB shows nine unknown cells. After two seconds
 without reports the whole view becomes unknown. Presence alone cannot identify player
 colour or kings. The homepage never changes accepted game state or turn lighting.

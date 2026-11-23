@@ -26,7 +26,7 @@ const serial=new BoardSerial(values=>{
 for(let y=5;y>=0;y--)for(let x=0;x<6;x++){
   const i=y*6+x,cell=document.createElement('div');
   cell.className=`cell sensor-cell${(x+y)%2===0?' alt':''}`;
-  cell.innerHTML=`<span class="sensor-marker" aria-hidden="true"></span><span class="sensor-coordinate">${square(i)}</span><span class="sensor-unknown" aria-hidden="true">?</span>`;
+  cell.innerHTML=`<span class="sensor-coordinate">${square(i)}</span><span class="sensor-unknown" aria-hidden="true">?</span>`;
   cell.setAttribute('role','img');grid.append(cell);cells[i]=cell;
 }
 function render(){
