@@ -52,7 +52,12 @@ Windows assigns another port.
   Sessions are not saved across refresh. Wi-Fi firmware, authenticated backend,
   durable sessions, and play between separate browsers remain future work.
 - USB reads existing text reports and sends existing `manual`, `off`, `led`, and
-  `turn` commands. Close the game connection before using Serial Monitor again.
+  `turn` commands. It waits for a sensor report before taking control, then sends
+  one command at a time and waits for its exact firmware acknowledgement. A missing
+  acknowledgement pauses physical play and requires disconnect/reconnect. The latest
+  complete lighting frame replaces queued frames; commands never interleave.
+  Normal Disconnect sends `off` before closing the port. Close the game connection
+  before using Serial Monitor again.
 - The USB path has been implemented and parser-tested, but live I/O with the repaired
   board has NOT been verified. A successful simulator test does not verify wiring.
 - LEDs are guidance only; a person moves the pieces. Magnetic presence cannot verify
@@ -67,7 +72,7 @@ Windows assigns another port.
 ## Developer checks
 
 ```text
-node --test tests/checkers.test.mjs
+node --test tests/*.test.mjs
 python -m http.server 4390 --bind 127.0.0.1 --directory dist
 ```
 

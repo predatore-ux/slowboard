@@ -20,7 +20,7 @@ function readings(){
 }
 function state(){
   if(!physical())return {kind:'web',moves:[]};
-  const ready=mode==='sim'||Boolean(serial.port&&Date.now()-lastSeen<2000&&$('#calibrated').checked);
+  const ready=mode==='sim'||Boolean(serial.ready&&!serial.failed&&Date.now()-lastSeen<2000&&$('#calibrated').checked);
   return reconcile(game,readings(),ready,aligned);
 }
 function moveAllowed(){return !physical()||state().kind==='aligned'&&game.turn===-1;}
@@ -41,7 +41,7 @@ for(let y=5;y>=0;y--)for(let x=0;x<6;x++){
   $('#sensors').append(sensor);sensorCells[i]=sensor;
 }
 function updateLights(s){
-  if(mode!=='usb'||!serial.port)return;
+  if(mode!=='usb'||!serial.ready||serial.failed||serial.closing)return;
   const ready=s.kind==='aligned'&&game.winner===null;
   const player=ready?(game.turn===1?1:2):0;
   const obs=readings();const commands=['manual','off'];
@@ -67,8 +67,8 @@ function render(){
   $('#p1').textContent=`Player one · blue · ${mode==='web'?'this screen':mode==='sim'?'simulated board':'physical board'}`;
   $('#usb-controls').hidden=mode!=='usb';$('#sim-controls').hidden=mode!=='sim';
   $('#connect').disabled=connecting||Boolean(serial.port)||!$('#calibrated').checked;
-  $('#disconnect').disabled=!serial.port;$('#mode').disabled=Boolean(serial.port)||connecting;
-  $('#connection').textContent=serial.port?(Date.now()-lastSeen<2000?'Receiving board reports.':'Waiting for board reports…'):'Not connected.';
+  $('#disconnect').disabled=!serial.port||connecting||serial.closing;$('#mode').disabled=Boolean(serial.port)||connecting;
+  $('#connection').textContent=!serial.port?'Not connected.':serial.failed?'Command confirmation failed. Disconnect and reconnect.':!serial.ready?'Waiting for ESP32 readiness and command confirmation…':Date.now()-lastSeen>=2000?'Waiting for board reports…':serial.sending?'Receiving sensors · confirming LED commands…':'Receiving sensors · LED commands confirmed.';
   $('#confirm').hidden=s.kind!=='candidate';$('#confirm').disabled=Date.now()-changedAt<500;
   const moves=game.winner===null?legalMoves(game.board,game.turn):[];
   const selectedMoves=moves.filter(m=>m.path[0]===selected);
