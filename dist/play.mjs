@@ -1,11 +1,14 @@
 import {initialGame,legalMoves,play,square,occupancy,fromHardware,hardwareToSquare,reconcile} from './checkers.mjs';
 import {BoardSerial} from './board-protocol.mjs';
+import {sensorChannel,unknownSensors} from './sensor-stream.mjs';
+let sensorFeed=sensorChannel();
 const $=s=>document.querySelector(s);
 let game=initialGame(),mode='web',selected=null,observed=Array(36).fill(null),simulated=occupancy(game.board);
 let lastSeen=0,changedAt=0,aligned=false,lastFrame='',connecting=false;
 const cells=[],sensorCells=[];
 function notice(message=''){$('#notice').textContent=message;}
 function receive(values){
+  sensorFeed.publish(values,'game');
   const next=fromHardware(values);
   if(JSON.stringify(next)!==JSON.stringify(observed))changedAt=Date.now();
   observed=next;lastSeen=Date.now();
@@ -104,3 +107,5 @@ $('#connect').onclick=async()=>{connecting=true;render();try{await serial.connec
 $('#disconnect').onclick=async()=>{try{await serial.disconnect();}catch(e){notice(e.message);}finally{lastSeen=0;aligned=false;lastFrame='';render();}};
 $('#reset').onclick=()=>{if(game.revision>0&&!confirm('Start a new game and clear the move history?'))return;game=initialGame();selected=null;aligned=false;changedAt=Date.now();if(mode==='sim')simulated=occupancy(game.board);notice();render();};
 setInterval(render,250);render();
+addEventListener('pagehide',()=>{if(serial.port)sensorFeed.publish(unknownSensors(),'game');sensorFeed.close();});
+addEventListener('pageshow',event=>{if(event.persisted)sensorFeed=sensorChannel();});

@@ -1,0 +1,27 @@
+/* Scoped to the live board; the landing page's motion and scenes stay intact. */
+.sensor-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:26px 0 16px}
+.sensor-actions button,.sensor-actions a{font-size:14px;padding:12px 18px;border:1px solid var(--secondary);border-radius:30px;background:transparent;color:var(--secondary);cursor:pointer}
+.sensor-actions #sensor-connect{background:var(--secondary);color:var(--paper)}
+.sensor-actions button:disabled{opacity:.55;cursor:default}
+.sensor-actions [hidden]{display:none}
+#play .play-copy>p:not(.eyebrow){font-size:16px;max-width:440px;line-height:1.7}
+#play .play-copy .sensor-help{font-size:14px;line-height:1.6}
+#play .demo-status{font-size:16px;line-height:1.6;align-items:flex-start}
+#sensor-health{margin-top:9px;background:var(--secondary);opacity:.35}
+#sensor-health[data-active="true"]{opacity:1}
+#play .demo-topline,#play .demo-bottomline{font-size:12px;gap:16px;flex-wrap:wrap}
+#play .demo-grid .sensor-cell{cursor:default;font-size:14px;background:var(--paper);color:var(--ink);box-shadow:none}
+#play .demo-grid .sensor-cell.alt{background:var(--blue)}
+.sensor-marker{position:absolute;width:54%;height:54%;border-radius:50%;background:var(--secondary);box-shadow:0 3px 0 #051b09,0 6px 12px #092a0f25;opacity:0;transform:scale(.7);transition:opacity .15s,transform .15s}
+.sensor-marker:after{content:'';position:absolute;inset:15%;border:1px solid #CCE3AE80;border-radius:50%}
+.sensed .sensor-marker{opacity:1;transform:scale(1)}
+.sensor-coordinate{z-index:1;transition:transform .15s}
+.sensed .sensor-coordinate{transform:translateY(210%);font-size:11px}
+.sensor-unknown{display:none}
+.sensor-unavailable .sensor-unknown{display:block;position:absolute;top:18%;font-size:clamp(18px,2vw,24px);line-height:1;color:var(--secondary)}
+.sensor-unavailable .sensor-coordinate{position:absolute;bottom:5px;font-size:11px}
+#play .demo-grid .sensor-unavailable{background-image:repeating-linear-gradient(135deg,transparent 0 8px,#120e0d08 8px 9px)}
+.legend-unknown{font-style:normal;font-size:14px}
+#play #sensor-last-change{font-size:14px;min-height:3em;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){.sensor-marker,.sensor-coordinate{transition:none}}
+@media(max-width:480px){#play .demo-board{padding:12px}#play .demo-topline{letter-spacing:.7px}.sensor-actions{gap:8px}.sensor-actions button,.sensor-actions a{padding:11px 13px}.sensor-unavailable .sensor-coordinate{bottom:3px}.sensed .sensor-coordinate{transform:translateY(150%)}}

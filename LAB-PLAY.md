@@ -1,7 +1,28 @@
 # Checkers lab preview
 
 Open `play.html` on the same host as the existing Slowboard homepage. Its header
-now links to the game. The homepage light demonstration remains unchanged.
+now links to the game. The homepage's 6 × 6 board is a live sensor monitor.
+
+## Live homepage sensing
+
+At `index.html#play`, choose **Connect live board** for USB testing with the existing
+original-based revision 1 firmware. Close Serial Monitor first. The monitor reads
+all 36 positions without sending lighting or game commands. Pieces already present
+appear on the first complete report; lifts and placements update as reports arrive.
+The firmware samples approximately every 200 ms, so gestures shorter than a sampling
+interval may not be observed. The parser may add one report interval of latency.
+
+During checkers, let the **game tab** own USB. Disconnect USB in the homepage monitor
+before connecting in the game. Use **Open live sensor view** to open the homepage in
+another tab; it automatically mirrors real sensor reports from the game, including
+temporary lifts and positions that are not legal moves. Both tabs must use the same
+site address and browser profile. This is a local browser stream, not a Wi-Fi or
+remote internet feed. Simulator readings are never broadcast as hardware readings.
+
+Green discs mean magnet detected; unmarked squares mean confirmed empty; question
+marks mean unknown/unreadable. A failed PCB shows nine unknown cells. After two seconds
+without reports the whole view becomes unknown. Presence alone cannot identify player
+colour or kings. The homepage never changes accepted game state or turn lighting.
 
 ## Today: no hardware required
 

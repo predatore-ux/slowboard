@@ -10,30 +10,6 @@ document.querySelectorAll('[data-board]').forEach(board=>{
     board.append(cell);
   }
 });
-const demo=document.getElementById('demo-grid');
-const status=document.getElementById('move-status');
-let signalTimer;
-for(let i=0;i<36;i++){
-  const square=document.createElement('button');
-  const coordinate=String.fromCharCode(65+i%6)+(6-Math.floor(i/6));
-  square.type='button';square.className='cell'+((Math.floor(i/6)+i%6)%2?' alt':'');square.textContent=coordinate;
-  square.setAttribute('aria-label','Send a demo move at '+coordinate);square.setAttribute('aria-pressed','false');
-  square.addEventListener('click',()=>{
-    clearTimeout(signalTimer);
-    demo.querySelectorAll('button').forEach(cell=>{cell.classList.remove('selected','received');cell.setAttribute('aria-pressed','false');});
-    square.classList.add('selected');square.setAttribute('aria-pressed','true');status.textContent='Your move: '+coordinate+'. Sending a little signal…';
-    signalTimer=setTimeout(()=>{square.classList.add('received');status.textContent='Signal received at '+coordinate+'. A small move, a shared moment.';},850);
-  });
-  square.addEventListener('keydown',event=>{
-    const offsets={ArrowRight:1,ArrowLeft:-1,ArrowDown:6,ArrowUp:-6};
-    if(event.key in offsets){event.preventDefault();const next=i+offsets[event.key];if(next>=0&&next<36)demo.children[next].focus();}
-  });
-  demo.append(square);
-}
-document.getElementById('reset-demo').addEventListener('click',()=>{
-  clearTimeout(signalTimer);demo.querySelectorAll('button').forEach(cell=>{cell.classList.remove('selected','received');cell.setAttribute('aria-pressed','false');});status.textContent='The board is waiting for your move.';
-});
-
 // Native scroll drives three pinned scenes; no wheel interception or scroll hijacking.
 const motion=matchMedia('(prefers-reduced-motion: reduce)');
 const narrow=matchMedia('(max-width: 850px)');

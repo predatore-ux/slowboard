@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="motion.css">
   <link rel="stylesheet" href="brand.css">
+  <link rel="stylesheet" href="live-board.css">
   <script src="app.js" defer></script>
+  <script type="module" src="live-board.mjs"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -54,8 +56,15 @@
     <div class="steps"><article><span>01</span><h3>Make it physical.</h3><p>Lift a magnetic piece. Place it on the board. Sensors beneath the surface detect the change.</p></article><article><span>02</span><h3>Let it travel.</h3><p>The connected board sends the proposed move over Wi-Fi to a shared cloud game session.</p></article><article><span>03</span><h3>Follow the light.</h3><p>A light on the other board communicates the update. The pieces still move by human hands.</p></article></div>
   </section></div>
   <section class="play-section" id="play">
-    <div class="play-copy"><p class="eyebrow">03 / A small taste of the interaction</p><h2>Your turn.<br><em>Take a moment.</em></h2><p>Choose a square. See how a physical gesture could become a little signal on the other side.</p><p class="demo-disclaimer">An illustrative light demo — not a live board connection or a full game.</p><div class="demo-status" aria-live="polite" aria-atomic="true"><span class="status-dot"></span><span id="move-status">The board is waiting for your move.</span></div><button class="reset" id="reset-demo">Reset the board <span aria-hidden="true">↺</span></button></div>
-    <div class="demo-wrap"><div class="demo-topline"><span>INTERACTIVE PREVIEW</span><span>6 × 6</span></div><div class="demo-board"><div class="grid demo-grid" id="demo-grid" role="group" aria-label="Choose a square on the demo board"></div></div><div class="demo-bottomline"><span><i class="legend-dot"></i> Your move</span><span><i class="legend-dot coral"></i> Received signal</span></div></div>
+    <div class="play-copy"><p class="eyebrow">03 / Every little move, live</p><h2>Your turn.<br><em>Take a moment.</em></h2><p>Place a piece. Lift it. See the board respond here, square by square.</p>
+      <div class="sensor-actions"><button id="sensor-connect" type="button">Connect live board</button><button id="sensor-disconnect" type="button" hidden>Disconnect USB</button><a href="play.html" target="_blank" rel="noopener">Play checkers</a></div>
+      <p class="sensor-help">Connect by USB to watch all 36 sensors. Playing checkers? Connect in the game tab and keep this page open in the same browser.</p>
+      <p class="sensor-help">Each disc marks a detected magnet. Piece colours and kings stay in the game.</p>
+      <div class="demo-status" role="status" aria-live="polite" aria-atomic="true"><span class="status-dot" id="sensor-health"></span><span id="move-status">Connect your board to begin live sensing.</span></div>
+      <p id="sensor-last-change">Waiting for the first sensor report.</p>
+      <p class="sensor-help" id="sensor-error-help" hidden>Close Arduino Serial Monitor. If the game owns the USB connection, leave it connected there and this view will follow. Direct USB connection needs desktop Chrome or Edge.</p>
+    </div>
+    <div class="demo-wrap"><div class="demo-topline"><span id="sensor-state">AWAITING BOARD</span><span id="sensor-count">36 positions</span></div><div class="demo-board"><div class="grid demo-grid" id="demo-grid" role="group" aria-label="Live magnetic sensors, A1 bottom left, F6 top right"></div></div><div class="demo-bottomline"><span><i class="legend-dot"></i> Magnet detected</span><span>Unmarked · empty</span><span><i class="legend-unknown">?</i> Unavailable</span></div></div>
   </section>
   <section class="inside" id="inside"><div class="inside-title"><p class="eyebrow">04 / Thoughtfully simple</p><h2>A little technology.<br><em>A lot of <span class="orange-word">possibility.</span></em></h2></div><div class="inside-content"><p class="inside-intro">The current prototype is built around a 6 × 6 playing surface and a custom PCB. The technology sits quietly underneath, leaving the play on top.</p><dl><div><dt>36 positions</dt><dd>One shared surface to explore different games.</dd></div><div><dt>Magnetic sensing</dt><dd>Reed switches detect the presence of a piece.</dd></div><div><dt>Light as a language</dt><dd>RGB LEDs communicate game feedback, square by square.</dd></div><div><dt>Connected at heart</dt><dd>An ESP32 links the board to a cloud game session over Wi-Fi.</dd></div></dl></div><div class="prototype-note"><span>WORK IN PROGRESS</span><p>Exploring checkers and Battleship variants for the 6 × 6 format. Hardware, game rules, and connected play are still in development.</p></div></section>
   <section class="closing"><p class="eyebrow">Good things take a little time.</p><h2>Stay in play.<br><em>Stay close.</em></h2><a class="button light" href="#play">Make another move <span aria-hidden="true">↗</span></a><div class="closing-piece" data-parallax="-0.12" aria-hidden="true"></div></section>

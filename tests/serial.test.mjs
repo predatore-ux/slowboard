@@ -4,6 +4,27 @@ import {ConfirmedCommands} from '../dist/serial-commands.mjs';
 import {BoardSerial} from '../dist/board-protocol.mjs';
 
 const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+test('homepage observation reads occupancy without issuing any LED commands',async()=>{
+  let input;const written=[],reports=[];
+  const port={
+    readable:new ReadableStream({start(controller){input=controller;}}),
+    writable:new WritableStream({write(bytes){written.push(bytes);}}),
+    async open(){},async close(){}
+  };
+  const original=Object.getOwnPropertyDescriptor(globalThis,'navigator');
+  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{serial:{requestPort:async()=>port}}});
+  const bridge=new BoardSerial(values=>reports.push(values),()=>{},{observeOnly:true});
+  try{
+    const connect=bridge.connect();await tick();
+    input.enqueue(new TextEncoder().encode('Detected magnets: B1_BL_HALL_A1\nDetected magnets: B1_BL_HALL_A1\n'));
+    await connect;assert.equal(bridge.ready,true);assert.equal(reports.at(-1)[0],true);
+    bridge.send('off\n');await tick();await bridge.disconnect();
+    assert.deepEqual(written,[]);
+  }finally{
+    if(bridge.port)await bridge.disconnect();
+    if(original)Object.defineProperty(globalThis,'navigator',original);else delete globalThis.navigator;
+  }
+});
 test('commands require the exact firmware acknowledgement, not sensor text',async()=>{
   const sent=[];const queue=new ConfirmedCommands(async line=>sent.push(line));
   let done=false;const pending=queue.send('led 0 255 0 0').then(()=>{done=true;});
