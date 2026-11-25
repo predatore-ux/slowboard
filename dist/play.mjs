@@ -1,5 +1,6 @@
 import {initialGame,legalMoves,play,square,occupancy,fromHardware,hardwareToSquare,reconcile} from './checkers.mjs';
 import {BoardSerial} from './board-protocol.mjs';
+import {BoardNetwork,PAIR_STORAGE} from './board-network.mjs';
 import {sensorChannel,unknownSensors} from './sensor-stream.mjs';
 let sensorFeed=sensorChannel();
 const $=s=>document.querySelector(s);
@@ -15,7 +16,9 @@ function receive(values){
   if(next.some(v=>v===null))aligned=false;
   render();
 }
-const serial=new BoardSerial(receive,e=>{notice(`Board connection: ${e.message}`);lastSeen=0;aligned=false;render();});
+const connectionError=e=>{notice(`Board connection: ${e.message}`);lastSeen=0;aligned=false;render();};
+const usb=new BoardSerial(receive,connectionError),wireless=new BoardNetwork(receive,connectionError);
+let serial=usb;
 function physical(){return mode!=='web';}
 function readings(){
   if(mode==='sim')return simulated.map((v,i)=>$('#fault').checked&&i%6>=3&&i>=18?null:v);
@@ -44,7 +47,8 @@ for(let y=5;y>=0;y--)for(let x=0;x<6;x++){
   $('#sensors').append(sensor);sensorCells[i]=sensor;
 }
 function updateLights(s){
-  if(mode!=='usb'||!serial.ready||serial.failed||serial.closing)return;
+  if(!['usb','wifi'].includes(mode)||!serial.ready||serial.failed||serial.closing)return;
+  if(mode==='wifi'&&!$('#calibrated').checked)return;
   const ready=s.kind==='aligned'&&game.winner===null;
   const player=ready?(game.turn===1?1:2):0;
   const obs=readings();const commands=['manual','off'];
@@ -68,7 +72,8 @@ function render(){
   $('#p1').classList.toggle('active',game.turn===1&&game.winner===null);
   $('#p2').classList.toggle('active',game.turn===-1&&game.winner===null);
   $('#p1').textContent=`Player one · blue · ${mode==='web'?'this screen':mode==='sim'?'simulated board':'physical board'}`;
-  $('#usb-controls').hidden=mode!=='usb';$('#sim-controls').hidden=mode!=='sim';
+  $('#usb-controls').hidden=!['usb','wifi'].includes(mode);$('#sim-controls').hidden=mode!=='sim';
+  $('#usb-help').hidden=mode!=='usb';$('#wifi-help').hidden=mode!=='wifi';
   $('#connect').disabled=connecting||Boolean(serial.port)||!$('#calibrated').checked;
   $('#disconnect').disabled=!serial.port||connecting||serial.closing;$('#mode').disabled=Boolean(serial.port)||connecting;
   $('#connection').textContent=!serial.port?'Not connected.':serial.failed?'Command confirmation failed. Disconnect and reconnect.':!serial.ready?'Waiting for ESP32 readiness and command confirmation…':Date.now()-lastSeen>=2000?'Waiting for board reports…':serial.sending?'Receiving sensors · confirming LED commands…':'Receiving sensors · LED commands confirmed.';
@@ -98,7 +103,7 @@ function render(){
   }
   updateLights(s);
 }
-$('#mode').onchange=()=>{mode=$('#mode').value;selected=null;aligned=false;changedAt=Date.now();simulated=occupancy(game.board);notice();render();};
+$('#mode').onchange=()=>{mode=$('#mode').value;serial=mode==='wifi'?wireless:usb;selected=null;aligned=false;changedAt=Date.now();simulated=occupancy(game.board);lastFrame='';notice();render();};
 $('#fault').onchange=()=>{aligned=false;changedAt=Date.now();render();};
 $('#align').onclick=()=>{simulated=occupancy(game.board);changedAt=Date.now();render();};
 $('#calibrated').onchange=()=>{aligned=false;render();};
@@ -109,3 +114,8 @@ $('#reset').onclick=()=>{if(game.revision>0&&!confirm('Start a new game and clea
 setInterval(render,250);render();
 addEventListener('pagehide',()=>{if(serial.port)sensorFeed.publish(unknownSensors(),'game');sensorFeed.close();});
 addEventListener('pageshow',event=>{if(event.persisted)sensorFeed=sensorChannel();});
+if(location.hash==='#wifi'&&sessionStorage.getItem(PAIR_STORAGE)){
+  mode='wifi';serial=wireless;$('#mode').value='wifi';
+  // Establish the heartbeat immediately; lighting waits for calibration confirmation.
+  $('#connect').onclick();
+}
