@@ -1,0 +1,4 @@
+private
+tests
+*.log
+.env
