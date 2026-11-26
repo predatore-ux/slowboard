@@ -20,7 +20,7 @@ export function commandsToFrame(text) {
   return result;
 }
 export class BoardNetwork {
-  constructor(onReport,onError,{fetcher=globalThis.fetch,storage=globalThis.sessionStorage}={}) {
+  constructor(onReport,onError,{fetcher=(...args)=>globalThis.fetch(...args),storage=globalThis.sessionStorage}={}) {
     Object.assign(this,{onReport,onError,fetcher,storage,port:null,ready:false,failed:false,closing:false,sending:false,
       pending:null,writeTask:Promise.resolve(),timer:null,waiter:null,clientSeq:0,credentials:null,generation:0});
   }
