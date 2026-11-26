@@ -12,7 +12,7 @@ const integer = (v,min,max) => Number.isInteger(v)&&v>=min&&v<=max;
 const fail = (status,message) => Object.assign(Error(message),{status});
 export function validFrame(frame) {
   return frame && Array.isArray(frame.colors)&&frame.colors.length===36&&
-    frame.colors.every(c=>integer(c,0,0xFFFFFF))&&integer(frame.player,0,2)&&integer(frame.brightness,0,255);
+    frame.colors.every(c=>integer(c,0,0xFFFFFF))&&integer(frame.player,0,3)&&integer(frame.brightness,0,255);
 }
 
 export function createRelay({devices,now=Date.now,allowedOrigins=['https://predatore-ux.github.io'],allowLocalHttp=false}={}) {
