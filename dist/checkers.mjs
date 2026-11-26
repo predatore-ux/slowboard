@@ -55,9 +55,18 @@ export function play(game,path,revision=game.revision) {
 }
 // Hardware order: BL, BR, TL, TR; within each 3x3 PCB, column-major bottom-up.
 // All boards must have local A1 at their lower-left, A3 upper-left, C1 lower-right.
+// Where the PHYSICAL board sits relative to the game, in quarter turns. The board is turned
+// so player one sits east with their pieces; the game itself is unchanged. 1 means physical
+// F1 is game A1 (physical C... F3 is game C1, E2 is B2). Set to 0 for the original seating.
+export const BOARD_TURN=1;
+export function turnSquare(index,turn=BOARD_TURN) {
+  let x=index%6,y=Math.floor(index/6);
+  for(let t=((turn%4)+4)%4;t>0;t--){[x,y]=[y,5-x];}
+  return y*6+x;
+}
 export function hardwareToSquare(index) {
   const b=Math.floor(index/9),s=index%9;
-  return (Math.floor(b/2)*3+s%3)*6+(b%2)*3+Math.floor(s/3);
+  return turnSquare((Math.floor(b/2)*3+s%3)*6+(b%2)*3+Math.floor(s/3));
 }
 export function fromHardware(values) {
   const result=Array(36).fill(null);

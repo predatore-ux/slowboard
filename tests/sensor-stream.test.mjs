@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {SensorSnapshot,sensorChannel,unknownSensors} from '../dist/sensor-stream.mjs';
 import {ReportParser} from '../dist/board-protocol.mjs';
-import {fromHardware} from '../dist/checkers.mjs';
+import {fromHardware,turnSquare} from '../dist/checkers.mjs';
 
 test('live snapshots retain initial occupancy, reflect lifts and expire to unknown',()=>{
   const state=new SensorSnapshot(),values=Array(36).fill(false);values[0]=true;values[35]=true;
@@ -17,10 +17,10 @@ test('all 36 sensor positions map to homepage coordinates and board faults stay 
   const reports=[],parser=new ReportParser(values=>reports.push(fromHardware(values)));
   parser.feed('Detected magnets: B1_BL_HALL_A1, B2_BR_HALL_C3, B3_TL_HALL_A3, B4_TR_HALL_C3\nDetected magnets: None\n');
   const values=reports.at(-1);
-  assert.equal(values[0],true); // A1
-  assert.equal(values[17],true); // F3
-  assert.equal(values[30],true); // A6
-  assert.equal(values[35],true); // F6
+  assert.equal(values[turnSquare(0)],true); // physical square 0, turned into game coordinates
+  assert.equal(values[turnSquare(17)],true); // physical square 17, turned into game coordinates
+  assert.equal(values[turnSquare(30)],true); // physical square 30, turned into game coordinates
+  assert.equal(values[turnSquare(35)],true); // physical square 35, turned into game coordinates
   parser.feed('Error: Failed to read B4_TR (0x26).None\nDetected magnets: None\n');
   assert.equal(reports.at(-1).filter(v=>v===null).length,9);
 });
