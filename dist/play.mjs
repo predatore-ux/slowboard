@@ -29,6 +29,7 @@ function state(){
   const ready=mode==='sim'||Boolean(serial.ready&&!serial.failed&&Date.now()-lastSeen<2000&&$('#calibrated').checked);
   return reconcile(game,readings(),ready,aligned);
 }
+const AUTO_CONFIRM_MS=2000;
 let cpuPending=false;
 const cpuActive=()=>mode==='cpu'||(physical()&&$('#cpu-orange').checked);
 const cpuTurn=()=>cpuActive()&&game.turn===-1&&game.winner===null;
@@ -98,6 +99,11 @@ function render(){
   $('#connect').disabled=connecting||Boolean(serial.port)||!$('#calibrated').checked;
   $('#disconnect').disabled=!serial.port||connecting||serial.closing;$('#mode').disabled=Boolean(serial.port)||connecting;
   $('#connection').textContent=!serial.port?'Not connected.':serial.failed?'Command confirmation failed. Disconnect and reconnect.':!serial.ready?'Waiting for ESP32 readiness and command confirmation…':Date.now()-lastSeen>=2000?'Waiting for board reports…':serial.sending?'Receiving sensors · confirming LED commands…':'Receiving sensors · LED commands confirmed.';
+  $('#auto-label').hidden=!['usb','wifi'].includes(mode);
+  // Auto-accept: exactly one legal move matches, and nothing has changed for AUTO_CONFIRM_MS.
+  // Chains are only matched when complete, and ambiguous results never auto-accept.
+  if(s.kind==='candidate'&&s.moves.length===1&&['usb','wifi'].includes(mode)&&$('#auto-confirm').checked&&
+     Date.now()-changedAt>=AUTO_CONFIRM_MS&&Date.now()-lastSeen<2000){commit(s.moves[0].path);return;}
   $('#confirm').hidden=s.kind!=='candidate';$('#confirm').disabled=Date.now()-changedAt<500;
   const moves=game.winner===null?legalMoves(game.board,game.turn):[];
   const selectedMoves=moves.filter(m=>m.path[0]===selected);
