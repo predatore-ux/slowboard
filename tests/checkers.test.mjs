@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {initialGame,legalMoves,play,hardwareToSquare,fromHardware,occupancy,reconcile} from '../dist/checkers.mjs';
+import {initialGame,legalMoves,play,hardwareToSquare,turnSquare,BOARD_TURN,fromHardware,occupancy,reconcile} from '../dist/checkers.mjs';
 import {ReportParser} from '../dist/board-protocol.mjs';
 const empty=()=>Array(36).fill(0);
 test('six pieces per side and only dark squares',()=>{
@@ -41,7 +41,24 @@ test('80 quiet turns result in a draw',()=>{
 });
 test('hardware mapping covers each square exactly once',()=>{
  assert.equal(new Set(Array.from({length:36},(_,i)=>hardwareToSquare(i))).size,36);
- assert.deepEqual([0,2,6,9,18,27].map(hardwareToSquare),[0,12,2,3,18,21]);
+ assert.equal(BOARD_TURN,1);
+ // physical squares (before the turn) for these hardware indexes are 0,12,2,3,18,21
+ assert.deepEqual([0,2,6,9,18,27].map(i=>hardwareToSquare(i)),[0,12,2,3,18,21].map(i=>turnSquare(i)));
+});
+test('turned board: physical F1,F3,F5,E2,E4,E6 are game A1,C1,E1,B2,D2,F2',()=>{
+ const name=i=>'ABCDEF'[i%6]+(Math.floor(i/6)+1),idx=n=>('ABCDEF'.indexOf(n[0]))+(n[1]-1)*6;
+ const pairs={F1:'A1',F3:'C1',F5:'E1',E2:'B2',E4:'D2',E6:'F2',A2:'B6',A4:'D6',A6:'F6',B1:'A5',B3:'C5',B5:'E5'};
+ for(const [phys,game] of Object.entries(pairs))assert.equal(name(turnSquare(idx(phys),1)),game,phys);
+});
+test('four quarter turns are the identity and every turn is a permutation',()=>{
+ for(let t=0;t<4;t++)assert.equal(new Set(Array.from({length:36},(_,i)=>turnSquare(i,t))).size,36);
+ for(let i=0;i<36;i++){assert.equal(turnSquare(i,4),i);assert.equal(turnSquare(i,0),i);}
+});
+test('turned start position: player one pieces sit on the physical east columns',()=>{
+ const g=initialGame(),hw=Array(36).fill(false);
+ for(let h=0;h<36;h++)hw[h]=Boolean(g.board[hardwareToSquare(h)]);
+ assert.equal(hw.filter(Boolean).length,12);
+ assert.deepEqual(fromHardware(hw).map(Boolean),occupancy(g.board));
 });
 test('Board 4 unavailable never becomes empty squares or a move',()=>{
  const hw=Array(36).fill(false);hw.fill(null,27);const obs=fromHardware(hw);
