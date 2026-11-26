@@ -42,7 +42,7 @@ test('complete frames arrive atomically and acknowledge from the device',async t
 test('malformed frames cannot mutate the accepted frame',async t=>{
   const f=await fixture(t);await f.device();const token=(await f.pair()).body.token;
   await f.request('/api/frame?board='+board,{method:'POST',token,data:f.frame});
-  for(const bad of [{colors:[1]}, {player:3}, {brightness:256},{colors:Array(36).fill(-1)},{colors:Array(36).fill(0.5)}]){
+  for(const bad of [{colors:[1]}, {player:4}, {brightness:256},{colors:Array(36).fill(-1)},{colors:Array(36).fill(0.5)}]){
     const r=await f.request('/api/frame?board='+board,{method:'POST',token,data:{...f.frame,clientSeq:2,...bad}});assert.equal(r.status,400);
   }
   assert.deepEqual((await f.device()).body.colors,f.frame.colors);

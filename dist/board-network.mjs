@@ -14,7 +14,7 @@ export function commandsToFrame(text) {
     if(line==='off'){result.colors.fill(0);result.player=0;continue;}
     let m=/^led (\d+) (\d+) (\d+) (\d+)$/.exec(line);
     if(m){const [i,r,g,b]=m.slice(1).map(Number);if(i>35||[r,g,b].some(v=>v>255))throw Error('Invalid LED frame.');result.colors[i]=(r<<16)|(g<<8)|b;continue;}
-    m=/^turn ([012])$/.exec(line);if(m){result.player=Number(m[1]);continue;}
+    m=/^turn ([0123])$/.exec(line);if(m){result.player=Number(m[1]);continue;}
     throw Error('Unsupported wireless lighting command.');
   }
   return result;

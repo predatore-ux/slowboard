@@ -19,7 +19,7 @@ function receive(values){
 const connectionError=e=>{notice(`Board connection: ${e.message}`);lastSeen=0;aligned=false;render();};
 const usb=new BoardSerial(receive,connectionError),wireless=new BoardNetwork(receive,connectionError);
 let serial=usb;
-function physical(){return mode!=='web';}
+function physical(){return ['sim','usb','wifi'].includes(mode);}
 function readings(){
   if(mode==='sim')return simulated.map((v,i)=>$('#fault').checked&&i%6>=3&&i>=18?null:v);
   return observed;
@@ -29,6 +29,23 @@ function state(){
   const ready=mode==='sim'||Boolean(serial.ready&&!serial.failed&&Date.now()-lastSeen<2000&&$('#calibrated').checked);
   return reconcile(game,readings(),ready,aligned);
 }
+let cpuPending=false;
+const cpuActive=()=>mode==='cpu'||(physical()&&$('#cpu-orange').checked);
+const cpuTurn=()=>cpuActive()&&game.turn===-1&&game.winner===null;
+function maybeCpu(){
+  if(!cpuTurn()||cpuPending)return;
+  const ready=()=>mode==='cpu'||state().kind==='aligned';
+  if(!ready())return;
+  cpuPending=true;
+  setTimeout(()=>{
+    cpuPending=false;
+    if(!cpuTurn()||!ready())return;
+    const moves=legalMoves(game.board,-1);if(!moves.length)return;
+    // Greedy and a little random: prefer captures and promotion.
+    const score=m=>m.captures.length*10+(m.promoted?5:0)+Math.random()*3;
+    commit(moves.reduce((a,b)=>score(b)>score(a)?b:a).path);
+  },700);
+}
 function moveAllowed(){return !physical()||state().kind==='aligned'&&game.turn===-1;}
 function commit(path){
   try{game=play(game,path);selected=null;aligned=false;notice();render();}catch(e){notice(e.message);}
@@ -37,7 +54,7 @@ for(let y=5;y>=0;y--)for(let x=0;x<6;x++){
   const i=y*6+x,button=document.createElement('button');button.type='button';
   button.className=`cell ${(x+y)%2===0?'dark':''}`;
   button.addEventListener('click',()=>{
-    if(game.winner!==null||!moveAllowed())return;
+    if(game.winner!==null||!moveAllowed()||cpuTurn())return;
     const candidates=legalMoves(game.board,game.turn).filter(m=>m.path[0]===selected&&m.path.at(-1)===i);
     if(candidates.length===1){commit(candidates[0].path);return;}
     selected=Math.sign(game.board[i])===game.turn?i:null;render();
@@ -50,7 +67,11 @@ function updateLights(s){
   if(!['usb','wifi'].includes(mode)||!serial.ready||serial.failed||serial.closing)return;
   if(mode==='wifi'&&!$('#calibrated').checked)return;
   const ready=s.kind==='aligned'&&game.winner===null;
-  const player=ready?(game.turn===1?1:2):0;
+  // Illegal physical move: blue's turn, board settled for 3 s, matches nothing legal.
+  // Red on both strips (player 3). Wi-Fi firmware only; the USB firmware rejects turn 3.
+  const illegal=mode==='wifi'&&s.kind==='restore'&&aligned&&game.turn===1&&game.winner===null&&
+    !readings().some(v=>v===null)&&Date.now()-changedAt>=3000;
+  const player=illegal?3:ready?(game.turn===1?1:2):0;
   const obs=readings();const commands=['manual','off'];
   for(let h=0;h<36;h++){
     const i=hardwareToSquare(h);let rgb=null;
@@ -71,7 +92,7 @@ function render(){
   $('#status').textContent=game.winner!==null?'Start a new game when you’re ready.':statuses[s.kind];
   $('#p1').classList.toggle('active',game.turn===1&&game.winner===null);
   $('#p2').classList.toggle('active',game.turn===-1&&game.winner===null);
-  $('#p1').textContent=`Player one · blue · ${mode==='web'?'this screen':mode==='sim'?'simulated board':'physical board'}`;
+  $('#p1').textContent=`Player one · blue · ${mode==='web'||mode==='cpu'?'this screen':mode==='sim'?'simulated board':'physical board'}`;
   $('#usb-controls').hidden=!['usb','wifi'].includes(mode);$('#sim-controls').hidden=mode!=='sim';
   $('#usb-help').hidden=mode!=='usb';$('#wifi-help').hidden=mode!=='wifi';
   $('#connect').disabled=connecting||Boolean(serial.port)||!$('#calibrated').checked;
@@ -102,6 +123,8 @@ function render(){
     game.history.forEach(m=>{const li=document.createElement('li');li.textContent=`${m.player===1?'Blue':'Orange'}: ${m.path.map(square).join(' → ')}${m.captures.length?' · capture':''}`;history.append(li);});
   }
   updateLights(s);
+  $('#cpu-orange-label').hidden=!['usb','wifi'].includes(mode);
+  maybeCpu();
 }
 $('#mode').onchange=()=>{mode=$('#mode').value;serial=mode==='wifi'?wireless:usb;selected=null;aligned=false;changedAt=Date.now();simulated=occupancy(game.board);lastFrame='';notice();render();};
 $('#fault').onchange=()=>{aligned=false;changedAt=Date.now();render();};
