@@ -88,12 +88,12 @@ function updateLights(s){
 function render(){
   const s=state();if(s.kind==='aligned')aligned=true;
   if(s.kind==='unavailable')aligned=false;
-  $('#turn').textContent=game.winner===0?'A shared draw.':game.winner!==null?`${game.winner===1?'Blue':'Orange'} wins.`:`${game.turn===1?'Blue':'Orange'} to move.`;
-  const statuses={web:'Choose a piece, then a highlighted destination.',aligned:game.turn===1?'Move a blue physical piece. Complete any captures, then confirm here.':'Orange can move on this screen.',unavailable:'Physical play paused. All four boards must be readable, connected and calibrated.',restore:'Match the physical pieces to the game board. Remove captured pieces and follow the highlighted differences.',candidate:'A legal physical move is detected. Check the pieces, then confirm.'};
+  $('#turn').textContent=game.winner===0?'A shared draw.':game.winner!==null?`${game.winner===1?'Green':'Maroon'} wins.`:`${game.turn===1?'Green':'Maroon'} to move.`;
+  const statuses={web:'Choose a piece, then a highlighted destination.',aligned:game.turn===1?'Move a green physical piece. Complete any captures, then confirm here.':'Maroon can move on this screen.',unavailable:'Physical play paused. All four boards must be readable, connected and calibrated.',restore:'Match the physical pieces to the game board. Remove captured pieces and follow the highlighted differences.',candidate:'A legal physical move is detected. Check the pieces, then confirm.'};
   $('#status').textContent=game.winner!==null?'Start a new game when you’re ready.':statuses[s.kind];
   $('#p1').classList.toggle('active',game.turn===1&&game.winner===null);
   $('#p2').classList.toggle('active',game.turn===-1&&game.winner===null);
-  $('#p1').textContent=`Player one · blue · ${mode==='web'||mode==='cpu'?'this screen':mode==='sim'?'simulated board':'physical board'}`;
+  $('#p1').textContent=`Player one · green · ${mode==='web'||mode==='cpu'?'this screen':mode==='sim'?'simulated board':'physical board'}`;
   $('#usb-controls').hidden=!['usb','wifi'].includes(mode);$('#sim-controls').hidden=mode!=='sim';
   $('#usb-help').hidden=mode!=='usb';$('#wifi-help').hidden=mode!=='wifi';
   $('#connect').disabled=connecting||Boolean(serial.port)||!$('#calibrated').checked;
@@ -109,7 +109,7 @@ function render(){
   const selectedMoves=moves.filter(m=>m.path[0]===selected);
   const obs=readings();
   cells.forEach((cell,i)=>{
-    const p=game.board[i],label=`${square(i)}: ${p?`${p>0?'blue':'orange'} ${Math.abs(p)===2?'king':'piece'}`:'empty'}`;
+    const p=game.board[i],label=`${square(i)}: ${p?`${p>0?'green':'maroon'} ${Math.abs(p)===2?'king':'piece'}`:'empty'}`;
     cell.setAttribute('aria-label',label);cell.setAttribute('aria-pressed',String(selected===i));
     cell.classList.toggle('selected',selected===i);cell.classList.toggle('target',moveAllowed()&&selectedMoves.some(m=>m.path.at(-1)===i));
     cell.classList.toggle('mismatch',physical()&&obs[i]!==null&&Boolean(p)!==obs[i]);
@@ -126,7 +126,7 @@ function render(){
   });}
   const history=$('#history');if(history.dataset.revision!==String(game.revision)){
     history.dataset.revision=String(game.revision);history.replaceChildren();
-    game.history.forEach(m=>{const li=document.createElement('li');li.textContent=`${m.player===1?'Blue':'Orange'}: ${m.path.map(square).join(' → ')}${m.captures.length?' · capture':''}`;history.append(li);});
+    game.history.forEach(m=>{const li=document.createElement('li');li.textContent=`${m.player===1?'Green':'Maroon'}: ${m.path.map(square).join(' → ')}${m.captures.length?' · capture':''}`;history.append(li);});
   }
   updateLights(s);
   $('#cpu-orange-label').hidden=!['usb','wifi'].includes(mode);
