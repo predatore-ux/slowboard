@@ -24,3 +24,24 @@
 #play #sensor-last-change{font-size:14px;min-height:3em;overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){#play .demo-grid .sensor-cell{transition:none}}
 @media(max-width:480px){#play .demo-board{padding:12px}#play .demo-topline{letter-spacing:.7px}.sensor-actions{gap:8px}.sensor-actions button,.sensor-actions a{padding:11px 13px}.sensor-unavailable .sensor-coordinate{bottom:3px}}
+
+/* ===== Homepage hero boards reskin: colour, background, border and shadow ONLY =====
+   Deliberately no transform, perspective, position, size, will-change or layout rules,
+   so the parallax scroll layers (.board-float and the rotated .board-left/.board-right) are untouched. */
+.board{background:#e8dcc0;border-color:#c9a97c;box-shadow:0 10px 0 #cdb68a,0 15px 0 #bfa578,0 35px 42px #283b3027}
+.board-rim,.board-bottom{color:#6b5a3c}
+.board .grid{background:#c9a97c;border-color:#c9a97c}
+.board .grid .cell{background:#e8dcc0;color:#6b5a3c}
+.board .grid .cell.alt{background:#e8dcc0;color:#6b5a3c;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='13' stroke='%23d2b88c' stroke-width='2' fill='none'/></svg>");background-repeat:no-repeat;background-position:center;background-size:40%}
+.board .grid .cell:not(.alt){background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M20 6v28M6 20h28' stroke='%23d2b88c' stroke-width='2' fill='none'/></svg>");background-repeat:no-repeat;background-position:center;background-size:34%}
+.board .grid .cell:after{background:#c9a97c88}
+.board .grid .cell.glow:after{background:#e9ffba;box-shadow:0 0 7px 3px #e8ff9c}
+.board .piece{background:#353f27;border-color:#353f27;box-shadow:4px 4px 0 #46403680}
+.board .piece:after{border-color:#e8dcc040}
+.board .piece.red{background:#3b0706;border-color:#3b0706;box-shadow:4px 4px 0 #46403680}
+.board .piece.red:after{border-color:#e8dcc040}
+.connected-board .board .piece,.connected-board .board .piece.red{box-shadow:2px 2px 0 #46403680}
+/* interactive demo grid keeps its brand.css behaviour on selection states, but on paper */
+.board .demo-grid .cell,.board .demo-grid .cell.alt{background-color:#e8dcc0}
+.board .demo-grid .cell.received{background:#d9a89a}
+.hero-art .piece-coral,.closing-piece{background:radial-gradient(ellipse at 40% 30%,#6b1a17,#3b0706);box-shadow:0 8px 0 #230404,0 20px 26px #28302145}
