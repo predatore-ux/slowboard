@@ -4,6 +4,7 @@ import {BoardNetwork,PAIR_STORAGE} from './board-network.mjs';
 import {sensorChannel,unknownSensors} from './sensor-stream.mjs';
 let sensorFeed=sensorChannel();
 const $=s=>document.querySelector(s);
+const KING_RGB=[90,0,110]; // violet: distinct from green/orange/blue used for moves and turns
 let game=initialGame(),mode='web',selected=null,observed=Array(36).fill(null),simulated=occupancy(game.board);
 let lastSeen=0,changedAt=0,aligned=false,lastFrame='',connecting=false;
 const cells=[],sensorCells=[];
@@ -78,6 +79,7 @@ function updateLights(s){
     const i=hardwareToSquare(h);let rgb=null;
     if(s.kind==='unavailable')rgb=[30,12,0];
     else if(Boolean(game.board[i])!==obs[i])rgb=game.board[i]?[0,100,25]:[140,35,0];
+    else if(Math.abs(game.board[i])===2)rgb=KING_RGB; // kings can't be sensed, so the board marks them
     else if(ready&&Math.sign(game.board[i])===game.turn)rgb=game.turn===1?[50,70,130]:[140,35,0];
     if(rgb)commands.push(`led ${h} ${rgb.join(' ')}`);
   }

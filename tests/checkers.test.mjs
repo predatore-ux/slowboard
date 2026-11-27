@@ -97,3 +97,24 @@ test('random legal playouts conserve players and board limits',()=>{
   }
  }
 });
+test('men capture backward but still only step forward',()=>{
+ const b=empty();b[14]=1;b[7]=-1; // victim behind player one's man (down-left)
+ const m=legalMoves(b,1);assert.equal(m.length,1);assert.deepEqual(m[0].path,[14,0]);assert.deepEqual(m[0].captures,[7]);
+ const w=empty();w[14]=1;assert.ok(legalMoves(w,1).every(x=>x.path.at(-1)>14));
+});
+test('kings fly: slide any distance and capture from afar, landing anywhere beyond',()=>{
+ const w=empty();w[0]=2;assert.deepEqual(legalMoves(w,1).map(m=>m.path.at(-1)).sort((a,b)=>a-b),[7,14,21,28,35]);
+ const c=empty();c[0]=2;c[21]=-1; // victim three squares away on the long diagonal
+ const m=legalMoves(c,1);assert.deepEqual(m.map(x=>x.path.at(-1)).sort((a,b)=>a-b),[28,35]);
+ assert.ok(m.every(x=>x.captures[0]===21&&x.board[21]===0));
+});
+test('a flying king must land where its chain can continue',()=>{
+ const c=empty();c[0]=2;c[7]=-1;c[16]=-1; // after taking 7, only landing 14 can then take 16
+ const m=legalMoves(c,1);assert.ok(m.length>0&&m.every(x=>x.captures.length===2));
+});
+test('a man crowned mid-capture carries on as a king',()=>{
+ const b=empty();b[19]=1;b[26]=-1;b[28]=-1; // 19 x 26 -> 33 (last row, crowned) then king x 28 -> 23
+ const m=legalMoves(b,1);assert.equal(m.length,1);
+ assert.deepEqual(m[0].path,[19,33,23]);assert.deepEqual(m[0].captures,[26,28]);
+ assert.equal(m[0].board[23],2);assert.equal(m[0].promoted,true);assert.equal(m[0].board[19]+m[0].board[26]+m[0].board[28],0);
+});

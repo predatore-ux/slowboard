@@ -10,34 +10,56 @@ export function initialGame() {
     if((x+y)%2===0) board[y*6+x]=y<2?1:y>3?-1:0;
   return {board,turn:1,revision:0,quiet:0,winner:null,history:[]};
 }
+// Rules (Russian draughts on 6x6): men step forward but capture in all four directions; kings
+// fly along diagonals and capture from any distance, landing on any empty square beyond the victim.
+// Captures are compulsory and chains must be completed (you may pick any complete chain).
+// A man reaching the far row mid-capture becomes a king and carries on as a king.
+// Captured pieces are removed at the end of the move: they block, and cannot be jumped twice.
+const DIAG=[[1,1],[-1,1],[1,-1],[-1,-1]];
 export function legalMoves(board,turn) {
-  const captures=[],walks=[];
-  function jump(b,pos,p,path,taken) {
-    let continued=false;
-    for(const dy of directions(p)) for(const dx of [-1,1]) {
-      const mid=at(pos%6+dx,Math.floor(pos/6)+dy);
-      const to=at(pos%6+2*dx,Math.floor(pos/6)+2*dy);
-      if(mid<0||to<0||owner(b[mid])!==-turn||b[to]!==0) continue;
-      continued=true;
-      const next=b.slice(); next[pos]=0; next[mid]=0;
-      const crowned=Math.abs(p)===1 && Math.floor(to/6)===(turn===1?5:0);
-      next[to]=crowned?p*2:p;
-      const route=[...path,to],removed=[...taken,mid];
-      if(crowned) captures.push({path:route,captures:removed,board:next,promoted:true});
-      else jump(next,to,p,route,removed);
+  const captures=[],walks=[],promoRow=turn===1?5:0;
+  const jumps=(b,pos,king,taken)=>{
+    const out=[];
+    for(const [dx,dy] of DIAG) {
+      let x=pos%6+dx,y=Math.floor(pos/6)+dy;
+      if(king) while(at(x,y)>=0&&b[at(x,y)]===0){x+=dx;y+=dy;}
+      const mid=at(x,y);
+      if(mid<0||owner(b[mid])!==-turn||taken.includes(mid)) continue;
+      const lands=[];
+      for(let lx=x+dx,ly=y+dy;at(lx,ly)>=0&&b[at(lx,ly)]===0;lx+=dx,ly+=dy){lands.push(at(lx,ly));if(!king)break;}
+      if(lands.length) out.push({mid,lands});
     }
-    if(!continued&&taken.length) captures.push({path,captures:taken,board:b,promoted:false});
+    return out;
+  };
+  function chain(b,from,pos,king,path,taken,promoted) {
+    const options=jumps(b,pos,king,taken);
+    if(!options.length) {
+      if(!taken.length) return;
+      const final=board.slice(); final[from]=0; taken.forEach(t=>{final[t]=0;});
+      final[pos]=king?turn*2:turn;
+      captures.push({path,captures:taken,board:final,promoted});
+      return;
+    }
+    for(const {mid,lands} of options) {
+      const nextTaken=[...taken,mid];
+      const info=lands.map(l=>{const k=king||Math.floor(l/6)===promoRow;return {l,k,more:jumps(b,l,k,nextTaken).length>0};});
+      for(const i of info.some(o=>o.more)?info.filter(o=>o.more):info)
+        chain(b,from,i.l,i.k,[...path,i.l],nextTaken,promoted||(!king&&i.k));
+    }
   }
   board.forEach((p,from)=>{
     if(owner(p)!==turn) return;
-    jump(board,from,p,[from],[]);
-    for(const dy of directions(p)) for(const dx of [-1,1]) {
-      const to=at(from%6+dx,Math.floor(from/6)+dy);
-      if(to<0||board[to]) continue;
-      const next=board.slice(); next[from]=0;
-      const promoted=Math.abs(p)===1&&Math.floor(to/6)===(turn===1?5:0);
-      next[to]=promoted?p*2:p;
-      walks.push({path:[from,to],captures:[],board:next,promoted});
+    const king=Math.abs(p)===2,lifted=board.slice(); lifted[from]=0;
+    chain(lifted,from,from,king,[from],[],false);
+    for(const [dx,dy] of DIAG) {
+      if(!king&&dy!==turn) continue;
+      for(let x=from%6+dx,y=Math.floor(from/6)+dy;at(x,y)>=0&&board[at(x,y)]===0;x+=dx,y+=dy) {
+        const to=at(x,y),next=board.slice(); next[from]=0;
+        const promoted=!king&&y===promoRow;
+        next[to]=promoted||king?turn*2:turn;
+        walks.push({path:[from,to],captures:[],board:next,promoted});
+        if(!king) break;
+      }
     }
   });
   return captures.length?captures:walks;
