@@ -1,3 +1,4 @@
+import {setWorkerTimeout,clearWorkerTimeout} from './ticker.mjs';
 import {RELAY_URL} from './network-config.mjs';
 import {PAIR_STORAGE,relayOrigin} from './board-network.mjs';
 const $=id=>document.getElementById(id);
@@ -12,7 +13,7 @@ async function keepAlive(){
     const response=await fetch(credentials.endpoint+'/api/state?board='+encodeURIComponent(credentials.board),{
       headers:{Authorization:'Bearer '+credentials.token},signal:AbortSignal.timeout(2500),cache:'no-store',credentials:'omit'});
     if(!response.ok)throw Error('Connection ended. Generate a fresh code and pair again.');
-    heartbeat=setTimeout(keepAlive,1000);
+    heartbeat=setWorkerTimeout(keepAlive,1000);
   }catch(error){credentials=null;sessionStorage.removeItem(PAIR_STORAGE);$('play-link').hidden=true;$('pair-status').textContent=error.message;}
 }
 $('pair-form').addEventListener('submit',async event=>{
@@ -28,8 +29,8 @@ $('pair-form').addEventListener('submit',async event=>{
     credentials={endpoint,board:id,token:result.token};sessionStorage.setItem(PAIR_STORAGE,JSON.stringify(credentials));
     localStorage.setItem('slowboard-relay-origin',endpoint);$('code').value='';
     $('pair-status').textContent='Board paired. Continue to the game in this tab.';$('play-link').hidden=false;
-    clearTimeout(heartbeat);keepAlive();
+    clearWorkerTimeout(heartbeat);keepAlive();
   }catch(error){$('pair-status').textContent=error.message==='Failed to fetch'?'Cannot reach the connection service. Check its address and your internet connection.':error.message;}
   finally{$('pair-button').disabled=false;}
 });
-addEventListener('pagehide',()=>clearTimeout(heartbeat));
+addEventListener('pagehide',()=>clearWorkerTimeout(heartbeat));

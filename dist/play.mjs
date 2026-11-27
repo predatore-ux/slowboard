@@ -1,3 +1,4 @@
+import {setTicker} from './ticker.mjs';
 import {initialGame,legalMoves,play,square,occupancy,fromHardware,hardwareToSquare,reconcile} from './checkers.mjs';
 import {BoardSerial} from './board-protocol.mjs';
 import {BoardNetwork,PAIR_STORAGE} from './board-network.mjs';
@@ -142,7 +143,7 @@ $('#confirm').onclick=()=>{const s=state();if(s.kind==='candidate'&&Date.now()-c
 $('#connect').onclick=async()=>{connecting=true;render();try{await serial.connect();lastFrame='';notice();}catch(e){notice(e.message);}finally{connecting=false;render();}};
 $('#disconnect').onclick=async()=>{try{await serial.disconnect();}catch(e){notice(e.message);}finally{lastSeen=0;aligned=false;lastFrame='';render();}};
 $('#reset').onclick=()=>{if(game.revision>0&&!confirm('Start a new game and clear the move history?'))return;game=initialGame();selected=null;aligned=false;changedAt=Date.now();if(mode==='sim')simulated=occupancy(game.board);notice();render();};
-setInterval(render,250);render();
+setTicker(render,250);render();
 addEventListener('pagehide',()=>{if(serial.port)sensorFeed.publish(unknownSensors(),'game');sensorFeed.close();});
 addEventListener('pageshow',event=>{if(event.persisted)sensorFeed=sensorChannel();});
 if(location.hash==='#wifi'&&sessionStorage.getItem(PAIR_STORAGE)){
@@ -150,3 +151,9 @@ if(location.hash==='#wifi'&&sessionStorage.getItem(PAIR_STORAGE)){
   // Establish the heartbeat immediately; lighting waits for calibration confirmation.
   $('#connect').onclick();
 }
+
+// Keep the screen awake while a board is in use so the page is not suspended mid-game.
+let wake=null;
+async function keepAwake(){try{if(navigator.wakeLock&&document.visibilityState==='visible'&&!wake){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null;});}}catch{wake=null;}}
+document.addEventListener('visibilitychange',()=>{if(physical())keepAwake();});
+document.addEventListener('click',()=>{if(physical())keepAwake();});

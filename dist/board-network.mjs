@@ -1,4 +1,5 @@
 import {validSensors} from './sensor-stream.mjs';
+import {setWorkerTimeout,clearWorkerTimeout} from './ticker.mjs';
 export const PAIR_STORAGE='slowboard-wifi-session-v1';
 export function relayOrigin(value) {
   const url=new URL(value);
@@ -55,9 +56,9 @@ export class BoardNetwork {
       if(generation!==this.generation||!this.port||this.failed)return;
       try {const state=await this.request('/api/state');if(generation!==this.generation)return;this.accept(state);}
       catch(error){if(generation===this.generation)this.fail(error);return;}
-      this.timer=setTimeout(poll,250);
+      this.timer=setWorkerTimeout(poll,250);
     };
-    this.timer=setTimeout(poll,100);
+    this.timer=setWorkerTimeout(poll,100);
   }
   async waitForAck(seq) {
     await new Promise((resolve,reject)=>{this.waiter={seq,resolve,reject,timer:setTimeout(()=>{
@@ -80,7 +81,7 @@ export class BoardNetwork {
     })();
   }
   fail(error) {
-    if(this.failed)return;this.failed=true;this.ready=false;this.pending=null;clearTimeout(this.timer);
+    if(this.failed)return;this.failed=true;this.ready=false;this.pending=null;clearWorkerTimeout(this.timer);
     if(this.waiter){clearTimeout(this.waiter.timer);this.waiter.reject(error);this.waiter=null;}
     this.onReport(Array(36).fill(null));this.onError(error);
   }
@@ -89,7 +90,7 @@ export class BoardNetwork {
     this.closing=true;this.pending=null;await this.writeTask;
     let error;
     try {await this.request('/api/disconnect',{method:'POST'});}catch(e){error=e;}
-    this.generation++;clearTimeout(this.timer);this.port=null;this.ready=false;this.closing=false;
+    this.generation++;clearWorkerTimeout(this.timer);this.port=null;this.ready=false;this.closing=false;
     this.storage?.removeItem(PAIR_STORAGE);this.onReport(Array(36).fill(null));
     if(error)throw error;
   }
