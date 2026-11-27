@@ -97,10 +97,28 @@ export function fromHardware(values) {
 }
 export const occupancy = board => board.map(Boolean);
 export const matches = (board,observed) => observed.length===36&&observed.every((v,i)=>v!==null&&v===Boolean(board[i]));
+// A capture chain that was stopped part-way (e.g. B2 jumped to D4 but D4 must jump on to F6).
+// Returns where the piece is and what is left to do, or null.
+export function partialCapture(game,observed) {
+  if(game.turn!==1||game.winner!==null||observed.length!==36||observed.some(v=>v===null)) return null;
+  for(const m of legalMoves(game.board,1)) {
+    for(let k=1;k<m.path.length-1;k++) {
+      const occ=game.board.map(Boolean); occ[m.path[0]]=false; occ[m.path[k]]=true;
+      const done=m.captures.slice(0,k); done.forEach(c=>{occ[c]=false;});
+      // pieces already jumped may or may not have been lifted yet
+      if(observed.every((v,i)=>v===occ[i]||(done.includes(i)&&v===true&&occ[i]===false))) {
+        return {at:m.path[k],next:m.path[k+1],remaining:m.captures.slice(k)};
+      }
+    }
+  }
+  return null;
+}
 export function reconcile(game,observed,ready,aligned) {
   if(!ready||observed.length!==36||observed.some(v=>v===null)) return {kind:'unavailable',moves:[]};
   if(matches(game.board,observed)) return {kind:'aligned',moves:[]};
   if(!aligned||game.turn!==1||game.winner!==null) return {kind:'restore',moves:[]};
   const moves=legalMoves(game.board,1).filter(m=>matches(m.board,observed));
-  return {kind:moves.length===1?'candidate':'restore',moves};
+  if(moves.length===1) return {kind:'candidate',moves};
+  const partial=moves.length?null:partialCapture(game,observed);
+  return partial?{kind:'restore',moves,partial}:{kind:'restore',moves};
 }

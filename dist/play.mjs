@@ -71,7 +71,7 @@ function updateLights(s){
   const ready=s.kind==='aligned'&&game.winner===null;
   // Illegal physical move: blue's turn, board settled for 3 s, matches nothing legal.
   // Red on both strips (player 3). Wi-Fi firmware only; the USB firmware rejects turn 3.
-  const illegal=mode==='wifi'&&s.kind==='restore'&&aligned&&game.turn===1&&game.winner===null&&
+  const illegal=mode==='wifi'&&s.kind==='restore'&&!s.partial&&aligned&&game.turn===1&&game.winner===null&&
     !readings().some(v=>v===null)&&Date.now()-changedAt>=3000;
   const player=illegal?3:ready?(game.turn===1?1:2):0;
   const obs=readings();const commands=['manual','off'];
@@ -92,7 +92,7 @@ function render(){
   if(s.kind==='unavailable')aligned=false;
   $('#turn').textContent=game.winner===0?'A shared draw.':game.winner!==null?`${game.winner===1?'Green':'Maroon'} wins.`:`${game.turn===1?'Green':'Maroon'} to move.`;
   const statuses={web:'Choose a piece, then a highlighted destination.',aligned:game.turn===1?'Move a green physical piece. Complete any captures, then confirm here.':'Maroon can move on this screen.',unavailable:'Physical play paused. All four boards must be readable, connected and calibrated.',restore:'Match the physical pieces to the game board. Remove captured pieces and follow the highlighted differences.',candidate:'A legal physical move is detected. Check the pieces, then confirm.'};
-  $('#status').textContent=game.winner!==null?'Start a new game when you’re ready.':statuses[s.kind];
+  $('#status').textContent=game.winner!==null?'Start a new game when you’re ready.':s.partial?`Capture not finished. Keep jumping from ${square(s.partial.at)} to ${square(s.partial.next)} and remove ${s.partial.remaining.map(square).join(', ')}.`:statuses[s.kind];
   $('#p1').classList.toggle('active',game.turn===1&&game.winner===null);
   $('#p2').classList.toggle('active',game.turn===-1&&game.winner===null);
   $('#p1').textContent=`Player one · green · ${mode==='web'||mode==='cpu'?'this screen':mode==='sim'?'simulated board':'physical board'}`;
