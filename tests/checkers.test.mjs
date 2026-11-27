@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {initialGame,legalMoves,play,hardwareToSquare,turnSquare,BOARD_TURN,fromHardware,occupancy,reconcile} from '../dist/checkers.mjs';
+import {partialCapture,initialGame,legalMoves,play,hardwareToSquare,turnSquare,BOARD_TURN,fromHardware,occupancy,reconcile} from '../dist/checkers.mjs';
 import {ReportParser} from '../dist/board-protocol.mjs';
 const empty=()=>Array(36).fill(0);
 test('six pieces per side and only dark squares',()=>{
@@ -117,4 +117,17 @@ test('a man crowned mid-capture carries on as a king',()=>{
  const m=legalMoves(b,1);assert.equal(m.length,1);
  assert.deepEqual(m[0].path,[19,33,23]);assert.deepEqual(m[0].captures,[26,28]);
  assert.equal(m[0].board[23],2);assert.equal(m[0].promoted,true);assert.equal(m[0].board[19]+m[0].board[26]+m[0].board[28],0);
+});
+test('a capture stopped half-way is reported, not treated as a mystery',()=>{
+ const sq=n=>'ABCDEF'.indexOf(n[0])+(n[1]-1)*6,b=empty();
+ ['B2','D2','F2','E3','E1'].forEach(n=>{b[sq(n)]=1;});['B6','A5','E5','F4','C3'].forEach(n=>{b[sq(n)]=-1;});
+ const g={...initialGame(),board:b},obs=b.map(Boolean);
+ obs[sq('B2')]=false;obs[sq('C3')]=false;obs[sq('D4')]=true; // jumped to D4, E5 still to take
+ const r=reconcile(g,obs,true,true);
+ assert.equal(r.kind,'restore');assert.equal(r.partial.at,sq('D4'));assert.equal(r.partial.next,sq('F6'));assert.deepEqual(r.partial.remaining,[sq('E5')]);
+ obs[sq('C3')]=true; // victim not lifted yet is also recognised
+ assert.ok(reconcile(g,obs,true,true).partial);
+ const done=b.map(Boolean);done[sq('B2')]=false;done[sq('C3')]=false;done[sq('E5')]=false;done[sq('F6')]=true;
+ assert.equal(reconcile(g,done,true,true).kind,'candidate');
+ assert.equal(partialCapture(g,b.map(Boolean)),null);
 });
